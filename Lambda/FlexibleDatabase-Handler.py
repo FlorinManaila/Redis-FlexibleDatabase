@@ -185,7 +185,67 @@ def lambda_handler (event, context):
                 else:
                     responseBody["Reason"] = reason
                 GetResponse(responseURL, responseBody)
+    
+    if event['RequestType'] == "Update":
+        cf_sub_id, cf_event, cf_db_id, cf_db_description = CurrentOutputs()
+        PhysicalResourceId = event['PhysicalResourceId']
+        responseBody.update({"PhysicalResourceId":PhysicalResourceId})
+        
+        if event['ResourceProperties']["enableDefaultUser"] == "true":
+            event['ResourceProperties']["enableDefaultUser"] = True
+        elif event['ResourceProperties']["enableDefaultUser"] == "false":
+            event['ResourceProperties']["enableDefaultUser"] = False
+        if "regexRules" in event['ResourceProperties']:
+            callEvent["regexRules"] = event['ResourceProperties']["regexRules"]
+        if "enableDefaultUser" in event['ResourceProperties']:
+            callEvent["enableDefaultUser"] = event['ResourceProperties']["enableDefaultUser"]
+        db_status = GetDatabaseStatus(cf_db_id)
+
+        if str(db_status) == "active":
+            responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
+            cf_event = cf_event.replace("\'", "\"")
+            cf_event = cf_event.replace("False", "false")
+            cf_event = cf_event.replace("True", "true")
+            cf_event = json.loads(cf_event)
+            cf_event.update(callEvent)
+            
+            print ("This is the event key after PUT call:")
+            print (cf_event)
+            
+            responseData.update({"SubscriptionId":str(subscription_id), "DatabaseId":str(db_id), "DatabaseDescription":str(db_description), "PostCall":str(callEvent)})
+            print (responseData)
+            responseBody.update({"Data":responseData})
+            
+            GetResponse(responseURL, responseBody)
+        
+        elif str(db_status) == "pending":
+            responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
+            print ("this is response value for update in pending")
+            print (responseValue)
+            db_error = GetDatabaseError (responseValue['links'][0]['href'])
+            responseStatus = 'FAILED'
+            reason = str(db_error)
+            if responseStatus == 'FAILED':
+                responseBody.update({"Status":responseStatus})
+                if "Reason" in str(responseBody):
+                    responseBody.update({"Reason":reason})
+                else:
+                    responseBody["Reason"] = reason
+                GetResponse(responseURL, responseBody)
                 
+        elif str(db_status) == "deleting":
+            responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
+            db_error = GetDatabaseError (responseValue['links'][0]['href'])
+            responseStatus = 'FAILED'
+            reason = str(db_error)
+            if responseStatus == 'FAILED':
+                responseBody.update({"Status":responseStatus})
+                if "Reason" in str(responseBody):
+                    responseBody.update({"Reason":reason})
+                else:
+                    responseBody["Reason"] = reason
+                GetResponse(responseURL, responseBody)
+            
     if event['RequestType'] == "Delete":
         try:
             cf_sub_id, cf_event, cf_db_id, cf_db_description = CurrentOutputs()
@@ -319,6 +379,93 @@ def GetDatabaseError (url):
 
     db_error_description = response["response"]["error"]["description"]
     return db_error_description
+    
+def PutDatabase (subscription_id, database_id, event):
+    url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
+    print (event)
+    
+    throughputMeasurement = {}
+    for key in list(event[throughputMeasurement])
+    	if key == "by":
+    	    throughputMeasurement['by'] = event[key]
+    	if key == "value":
+    	    throughputMeasurement['value'] = event[key]
+    
+    remoteBackup = {}
+    for key in list(event[remoteBackup]):
+    	if key == "active":
+    	    remoteBackup['active'] = event[key]
+    	if key == "interval":
+    	    remoteBackup['interval'] = event[key]
+    	if key == "timeUTC":
+    	    remoteBackup['timeUTC'] = event[key]
+    	if key == "storageType":
+    	    remoteBackup['storageType'] = event[key]
+    	if key == "storagePath":
+    	    remoteBackup['storagePath'] = event[key]
+    
+    alertsList = []
+    alertsDict = {}
+    for key in list(event[alerts]):
+    	if key == "alertName":
+    	    alertsDict['name'] = event[key]
+    	if key == "alertValue":
+    	    alertsDict['value'] = event[key]
+    alertsList.append(alertsDict)
+    
+    update_dict = {}
+    for key in list(event):
+    	if key == "dryRun":
+    	    update_dict['dryRun'] = event[key]
+    	if key == "name":
+    	    update_dict['name'] = event[key]
+    	if key == "memoryLimitInGb":
+    	    update_dict['memoryLimitInGb'] = event[key]
+    	if key == "respVersion":
+    	    update_dict['respVersion'] = event[key]
+    	if key == "throughputMeasurement":
+    	    update_dict['throughputMeasurement'] = throughputMeasurement
+    	if key == "dataPersistence":
+    	    update_dict['dataPersistence'] = event[key]
+    	if key == "dataEvictionPolicy":
+    	    update_dict['dataEvictionPolicy'] = event[key]
+    	if key == "replication":
+    	    update_dict['replication'] = event[key]
+    	if key == "regexRules":
+    	    update_dict['regexRules'] = event[key]
+    	if key == "replicaOf":
+    	    update_dict['replicaOf'] = event[key]
+    	if key == "supportOSSClusterApi":
+    	    update_dict['supportOSSClusterApi'] = event[key]
+    	if key == "useExternalEndpointForOSSClusterApi":
+    	    update_dict['useExternalEndpointForOSSClusterApi'] = event[key]
+    	if key == "password":
+    	    update_dict['password'] = event[key]
+    	if key == "saslUsername":
+    	    update_dict['saslUsername'] = event[key]
+    	if key == "saslPassword":
+    	    update_dict['saslPassword'] = event[key]
+    	if key == "sourceIp":
+    	    update_dict['sourceIp'] = event[key]
+    	if key == "clientSslCertificate":
+    	    update_dict['clientSslCertificate'] = event[key]
+    	if key == "enableTls":
+    	    update_dict['enableTls'] = event[key]
+    	if key == "enableDefaultUser":
+    	    update_dict['enableDefaultUser'] = event[key]
+    	if key == "remoteBackup":
+    	    update_dict['remoteBackup'] = remoteBackup
+    	if key == "alerts":
+    	    update_dict['alerts'] = alertsList
+    print ("Dict to PUT is:")
+    print (update_dict)
+    
+    response = requests.put(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key, "Content-Type":content_type}, json = update_dict)
+    print ("PutSubscription response is:")
+    print(response)
+    response_json = response.json()
+    return response_json
+    Logs(response_json)
     
 def DeleteDatabase (subscription_id, db_id):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
