@@ -199,6 +199,12 @@ Parameters:
     parameters:
       Type: String
       Description: "[Optional]. Redis database module parameters (name and value), as relevant to the specific module (see modules parameters specification). Example: OrderedMap {}"
+    regexRules:
+      Type: String
+      Description: '[Cannot assign value upon creating stack. Value can be assigned only on stack update][Optional]. Shard regex rules. Relevant only for a sharded database. Example: "regexRules": [{"ordinal": 1, "pattern": "(?<tag>.*)"}, {"ordinal": 0, "pattern": ".*\\{(?<tag>.*)\\}.*"}]'
+    enableDefaultUser:
+      Type: String
+      Description: "[Cannot assign value upon creating stack. Value can be assigned only on stack update][Optional]. When 'true', enables connecting to the database with the 'default' user. Default: 'true'. Can only be set if Database Protocol is REDIS"
 
 Metadata:
   AWS::CloudFormation::Interface:
@@ -253,6 +259,12 @@ Metadata:
        Parameters:
          - moduleName
          - parameters
+      -
+        Label: 
+          default: "Only for Update Stack"
+        Parameters:
+         - regexRules
+         - enableDefaultUser
 
 Conditions:
   dryRunCondition:                              !Not [!Equals [!Ref dryRun, ""]]
@@ -283,6 +295,8 @@ Conditions:
   alertValueCondition:                          !Not [!Equals [!Ref alertValue, ""]]
   moduleNameCondition:                          !Not [!Equals [!Ref moduleName, ""]]
   parametersCondition:                          !Not [!Equals [!Ref parameters, ""]]
+  regexRulesCondition:                          !Not [!Equals [!Ref regexRules, ""]]
+  enableDefaultUserCondition:                   !Not [!Equals [!Ref enableDefaultUser, ""]]
 
 Resources:
   StepFunctionsAllowLambda:
@@ -602,7 +616,9 @@ Resources:
         alertValue:                          !If [alertValueCondition, !Ref alertValue, !Ref "AWS::NoValue"]
         moduleName:                          !If [moduleNameCondition, !Ref moduleName, !Ref "AWS::NoValue"]
         parameters:                          !If [parametersCondition, !Ref parameters, !Ref "AWS::NoValue"]
-
+        regexRules:                          !If [regexRulesCondition, !Ref regexRules, !Ref "AWS::NoValue"]
+        enableDefaultUser:                   !If [enableDefaultUserCondition, !Ref enableDefaultUser, !Ref "AWS::NoValue"]
+        
 Outputs:
   SubscriptionId:
     Description: Subscription ID used for the current stack
