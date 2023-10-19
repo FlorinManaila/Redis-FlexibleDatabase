@@ -84,11 +84,7 @@ Parameters:
       Description: "[Required]. Maximum memory usage for this specific database. Minimum: 0.1. exclusiveMinimum: false. Example: 1"
     respVersion:
       Type: String
-      Description: "[Optional]. RESP version must be compatible with Redis version. Example: resp3"
-      AllowedValues: 
-        - resp2
-        - resp3
-      Default: resp3
+      Description: "[Optional]. RESP version must be compatible with Redis version. Example: resp3. Allowed values: resp2/resp3."
     supportOSSClusterApi:
       Type: String
       AllowedValues: 
@@ -578,47 +574,47 @@ Resources:
               - !Ref version
               - "/FlexibleDatabase-CFResponse.zip"
 
-   Redis:
-      Type: Custom::FlexibleDatabase-Handler
-      Version: "1.0"
-      Properties:
-        ServiceToken: !GetAtt FlexibleDatabaseHandler.Arn
-        version:                             !Ref version
-        baseURL:                             !Ref baseURL
-        subscriptionId:                      !Ref subscriptionId
-        dryRun:                              !If [dryRunCondition, !Ref dryRun, !Ref "AWS::NoValue"]
-        dbname:                              !Ref dbname
-        protocol:                            !If [protocolCondition, !Ref protocol, !Ref "AWS::NoValue"]
-        port:                                !If [portCondition, !Ref port, !Ref "AWS::NoValue"]
-        memoryLimitInGb:                     !Ref memoryLimitInGb
-        respVersion:                         !If [respVersionCondition, !Ref respVersion, !Ref "AWS::NoValue"]
-        supportOSSClusterApi:                !If [supportOSSClusterApiCondition, !Ref supportOSSClusterApi, !Ref "AWS::NoValue"]
-        useExternalEndpointForOSSClusterApi: !If [useExternalEndpointForOSSClusterApiCondition, !Ref useExternalEndpointForOSSClusterApi, !Ref "AWS::NoValue"]
-        dataPersistence:                     !If [dataPersistenceCondition, !Ref dataPersistence, !Ref "AWS::NoValue"]
-        dataEvictionPolicy:                  !If [dataEvictionPolicyCondition, !Ref dataEvictionPolicy, !Ref "AWS::NoValue"]
-        replication:                         !If [replicationCondition, !Ref replication, !Ref "AWS::NoValue"]
-        replicaOf:                           !If [replicaOfCondition, !Ref replicaOf, !Ref "AWS::NoValue"]
-        averageItemSizeInBytes:              !If [averageItemSizeInBytesCondition, !Ref averageItemSizeInBytes, !Ref "AWS::NoValue"]
-        by:                                  !If [byCondition, !Ref by, !Ref "AWS::NoValue"]
-        value:                               !If [valueCondition, !Ref value, !Ref "AWS::NoValue"]
-        active:                              !If [activeCondition, !Ref active, !Ref "AWS::NoValue"]
-        interval:                            !If [intervalCondition, !Ref interval, !Ref "AWS::NoValue"]
-        timeUTC:                             !If [timeUTCCondition, !Ref timeUTC, !Ref "AWS::NoValue"]
-        storageType:                         !If [storageTypeCondition, !Ref storageType, !Ref "AWS::NoValue"]
-        storagePath:                         !If [storagePathCondition, !Ref storagePath, !Ref "AWS::NoValue"]
-        sourceIp:                            !If [sourceIpCondition, !Ref sourceIp, !Ref "AWS::NoValue"]
-        clientSslCertificate:                !If [clientSslCertificateCondition, !Ref clientSslCertificate, !Ref "AWS::NoValue"]
-        enableTls:                           !If [enableTlsCondition, !Ref enableTls, !Ref "AWS::NoValue"]
-        password:                            !If [passwordCondition, !Ref password, !Ref "AWS::NoValue"]
-        saslUsername:                        !If [saslUsernameCondition, !Ref saslUsername, !Ref "AWS::NoValue"]
-        saslPassword:                        !If [saslPasswordCondition, !Ref saslPassword, !Ref "AWS::NoValue"]
-        alertName:                           !If [alertNameCondition, !Ref alertName, !Ref "AWS::NoValue"]
-        alertValue:                          !If [alertValueCondition, !Ref alertValue, !Ref "AWS::NoValue"]
-        moduleName:                          !If [moduleNameCondition, !Ref moduleName, !Ref "AWS::NoValue"]
-        parameters:                          !If [parametersCondition, !Ref parameters, !Ref "AWS::NoValue"]
-        regexRules:                          !If [regexRulesCondition, !Ref regexRules, !Ref "AWS::NoValue"]
-        enableDefaultUser:                   !If [enableDefaultUserCondition, !Ref enableDefaultUser, !Ref "AWS::NoValue"]
-        
+  Redis:
+    Type: Custom::FlexibleDatabase-Handler
+    Version: "1.0"
+    Properties:
+      ServiceToken: !GetAtt FlexibleDatabaseHandler.Arn
+      version:                             !Ref version
+      baseURL:                             !Ref baseURL
+      subscriptionId:                      !Ref subscriptionId
+      dryRun:                              !If [dryRunCondition, !Ref dryRun, !Ref "AWS::NoValue"]
+      dbname:                              !Ref dbname
+      protocol:                            !If [protocolCondition, !Ref protocol, !Ref "AWS::NoValue"]
+      port:                                !If [portCondition, !Ref port, !Ref "AWS::NoValue"]
+      memoryLimitInGb:                     !Ref memoryLimitInGb
+      respVersion:                         !If [respVersionCondition, !Ref respVersion, !Ref "AWS::NoValue"]
+      supportOSSClusterApi:                !If [supportOSSClusterApiCondition, !Ref supportOSSClusterApi, !Ref "AWS::NoValue"]
+      useExternalEndpointForOSSClusterApi: !If [useExternalEndpointForOSSClusterApiCondition, !Ref useExternalEndpointForOSSClusterApi, !Ref "AWS::NoValue"]
+      dataPersistence:                     !If [dataPersistenceCondition, !Ref dataPersistence, !Ref "AWS::NoValue"]
+      dataEvictionPolicy:                  !If [dataEvictionPolicyCondition, !Ref dataEvictionPolicy, !Ref "AWS::NoValue"]
+      replication:                         !If [replicationCondition, !Ref replication, !Ref "AWS::NoValue"]
+      replicaOf:                           !If [replicaOfCondition, !Ref replicaOf, !Ref "AWS::NoValue"]
+      averageItemSizeInBytes:              !If [averageItemSizeInBytesCondition, !Ref averageItemSizeInBytes, !Ref "AWS::NoValue"]
+      by:                                  !If [byCondition, !Ref by, !Ref "AWS::NoValue"]
+      value:                               !If [valueCondition, !Ref value, !Ref "AWS::NoValue"]
+      active:                              !If [activeCondition, !Ref active, !Ref "AWS::NoValue"]
+      interval:                            !If [intervalCondition, !Ref interval, !Ref "AWS::NoValue"]
+      timeUTC:                             !If [timeUTCCondition, !Ref timeUTC, !Ref "AWS::NoValue"]
+      storageType:                         !If [storageTypeCondition, !Ref storageType, !Ref "AWS::NoValue"]
+      storagePath:                         !If [storagePathCondition, !Ref storagePath, !Ref "AWS::NoValue"]
+      sourceIp:                            !If [sourceIpCondition, !Ref sourceIp, !Ref "AWS::NoValue"]
+      clientSslCertificate:                !If [clientSslCertificateCondition, !Ref clientSslCertificate, !Ref "AWS::NoValue"]
+      enableTls:                           !If [enableTlsCondition, !Ref enableTls, !Ref "AWS::NoValue"]
+      password:                            !If [passwordCondition, !Ref password, !Ref "AWS::NoValue"]
+      saslUsername:                        !If [saslUsernameCondition, !Ref saslUsername, !Ref "AWS::NoValue"]
+      saslPassword:                        !If [saslPasswordCondition, !Ref saslPassword, !Ref "AWS::NoValue"]
+      alertName:                           !If [alertNameCondition, !Ref alertName, !Ref "AWS::NoValue"]
+      alertValue:                          !If [alertValueCondition, !Ref alertValue, !Ref "AWS::NoValue"]
+      moduleName:                          !If [moduleNameCondition, !Ref moduleName, !Ref "AWS::NoValue"]
+      parameters:                          !If [parametersCondition, !Ref parameters, !Ref "AWS::NoValue"]
+      regexRules:                          !If [regexRulesCondition, !Ref regexRules, !Ref "AWS::NoValue"]
+      enableDefaultUser:                   !If [enableDefaultUserCondition, !Ref enableDefaultUser, !Ref "AWS::NoValue"]
+
 Outputs:
   SubscriptionId:
     Description: Subscription ID used for the current stack
