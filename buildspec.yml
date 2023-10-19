@@ -23,7 +23,7 @@ phases:
       - aws s3 cp CloudFormation/FlexibleDatabaseCFTemplate.yml s3://redis-cicd/Flexible-Database/$VERSION_NUMBER/
       - aws s3 cp CloudFormation/FlexibleDatabaseCFTemplate.yml s3://redis-cicd/Flexible-Database/latest/
       # Create a zip archive for lambda and upload archives to S3
-      - zip -j FlexibleDatabase-Handler.zip Lambda/FlexibleDatabase-Handler.py
+      - zip -j FlexibleDatabase-CheckState.zip Lambda/FlexibleDatabase-CheckState.py
       - zip -j FlexibleDatabase-CFResponse.zip Lambda/FlexibleDatabase-CFResponse.py
       - zip -j FlexibleDatabase-Handler.zip Lambda/FlexibleDatabase-Handler.py
       - aws s3 cp FlexibleDatabase-CheckState.zip s3://redis-cicd/Flexible-Database/latest/
