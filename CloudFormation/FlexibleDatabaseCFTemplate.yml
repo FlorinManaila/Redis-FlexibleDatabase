@@ -207,6 +207,7 @@ Metadata:
     ParameterGroups:
       - 
         Parameters:
+          - dbname
           - version
           - baseURL
           - subscriptionId
