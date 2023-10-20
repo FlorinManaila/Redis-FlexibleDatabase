@@ -321,7 +321,7 @@ def GetDatabase (subscription_id, database_id):
     response = requests.get(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
     response = response.json()
     
-    while "databaseId" not in str(response) and count < 60:
+    while "databaseId" not in str(response) and count < 120:
         time.sleep(1)
         count += 1
         print (str(response))
@@ -347,7 +347,7 @@ def GetDatabaseId (url):
     print (str(response))
     count = 0
     
-    while "resourceId" not in str(response) and count < 60:
+    while "resourceId" not in str(response) and count < 120:
         time.sleep(1)
         count += 1
         print (str(response))
@@ -371,7 +371,7 @@ def GetDatabaseError (url):
     response = response.json()
     count = 0
 
-    while "processing-error" not in str(response) and count < 60:
+    while "processing-error" not in str(response) and count < 120:
         time.sleep(1)
         count += 1
         response = requests.get(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
