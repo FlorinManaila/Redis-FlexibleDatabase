@@ -35,16 +35,18 @@ def lambda_handler (event, context):
         event['ResourceProperties']["replication"] = True
     elif event['ResourceProperties']["replication"] == "false":
         event['ResourceProperties']["replication"] = False
-        
-    if event['ResourceProperties']["active"] == "true":
-        event['ResourceProperties']["active"] = True
-    elif event['ResourceProperties']["active"] == "false":
-        event['ResourceProperties']["active"] = False
-        
-    if event['ResourceProperties']["enableTls"] == "true":
-        event['ResourceProperties']["enableTls"] = True
-    elif event['ResourceProperties']["enableTls"] == "false":
-        event['ResourceProperties']["enableTls"] = False
+    
+    if "active" in event['ResourceProperties']:   
+        if event['ResourceProperties']["active"] == "true":
+            event['ResourceProperties']["active"] = True
+        elif event['ResourceProperties']["active"] == "false":
+            event['ResourceProperties']["active"] = False
+            
+    if "enableTls" in event['ResourceProperties']:    
+        if event['ResourceProperties']["enableTls"] == "true":
+            event['ResourceProperties']["enableTls"] = True
+        elif event['ResourceProperties']["enableTls"] == "false":
+            event['ResourceProperties']["enableTls"] = False
         
     throughputMeasurement = {}
     if "by" in event['ResourceProperties']:
