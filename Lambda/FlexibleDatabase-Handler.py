@@ -205,7 +205,7 @@ def lambda_handler (event, context):
         
         if "enableDefaultUser" in event['ResourceProperties']:
             callEvent["enableDefaultUser"] = event['ResourceProperties']["enableDefaultUser"]
-        db_status = GetDatabaseStatus(cf_db_id)
+        db_status = GetDatabaseStatus(cf_sub_id, cf_db_id)
 
         if str(db_status) == "active":
             responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
@@ -218,7 +218,7 @@ def lambda_handler (event, context):
             print ("This is the event key after PUT call:")
             print (cf_event)
             
-            responseData.update({"SubscriptionId":str(subscription_id), "DatabaseId":str(db_id), "DatabaseDescription":str(db_description), "PostCall":str(callEvent)})
+            responseData.update({"SubscriptionId":str(cf_sub_id), "DatabaseId":str(cf_db_id), "DatabaseDescription":str(cf_db_description), "PostCall":str(cf_event)})
             print (responseData)
             responseBody.update({"Data":responseData})
             
