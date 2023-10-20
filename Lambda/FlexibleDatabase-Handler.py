@@ -468,9 +468,9 @@ def PutDatabase (subscription_id, database_id, event):
     print (update_dict)
     
     response = requests.put(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key, "Content-Type":content_type}, json = update_dict)
-    print ("PutSubscription response is:")
-    print(response)
     response_json = response.json()
+    print ("PutSubscription response is:")
+    print(response_json)
     return response_json
     Logs(response_json)
     
