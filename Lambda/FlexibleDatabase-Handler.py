@@ -385,7 +385,7 @@ def PutDatabase (subscription_id, database_id, event):
     print (event)
     
     throughputMeasurement = {}
-    for key in list(event[throughputMeasurement])
+    for key in list(event[throughputMeasurement]):
     	if key == "by":
     	    throughputMeasurement['by'] = event[key]
     	if key == "value":
