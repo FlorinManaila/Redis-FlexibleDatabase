@@ -158,7 +158,7 @@ Parameters:
       Description: "[Optional]. State the hour which the backup will take place. available only for 12 or 24 hours backup interval. should be specified an hour for example 2 PM as 14:00"
     storageType:
       Type: String
-      Description: "[Required when active is true]. Type of storage source from which to import the database file (RDB files) or data (Redis connection)"
+      Description: "[Required when active is true]. Type of storage source from which to import the database file (RDB files) or data (Redis connection). List of options: [http, redis, ftp, aws-s3, azure-blob-storage, google-blob-storage]."
     storagePath:
       Type: String
       Description: "[Required when active is true]. Path for backup"
