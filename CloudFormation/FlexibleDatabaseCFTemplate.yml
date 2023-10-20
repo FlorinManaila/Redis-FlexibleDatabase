@@ -161,7 +161,7 @@ Parameters:
       Description: "[Required when active is true]. Type of storage source from which to import the database file (RDB files) or data (Redis connection). List of options: [http, redis, ftp, aws-s3, azure-blob-storage, google-blob-storage]."
     storagePath:
       Type: String
-      Description: "[Required when active is true]. Path for backup"
+      Description: "[Required when active is true]. Path for backup. s3://<bucket-name>/<path>/"
     #remoteBackupdone
     sourceIp:
       Type: String
