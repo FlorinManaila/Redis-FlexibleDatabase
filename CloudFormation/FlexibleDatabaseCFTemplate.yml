@@ -363,7 +363,7 @@ Resources:
               "Choices": [
                 {
                   "Not": {
-                    "Variable": "$.sub_status",
+                    "Variable": "$.db_status",
                     "StringEquals": "active"
                   },
                   "Next": "Wait"
