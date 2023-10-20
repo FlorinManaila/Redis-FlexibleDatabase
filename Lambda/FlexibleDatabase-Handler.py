@@ -265,7 +265,7 @@ def lambda_handler (event, context):
                 GetResponse(responseURL, responseBody)
             except:
                 responseStatus = 'FAILED'
-                reason = "Unable to delete subscription"
+                reason = "Unable to delete database"
                 if responseStatus == 'FAILED':
                     responseBody.update({"Status":responseStatus})
                     if "Reason" in str(responseBody):
@@ -469,7 +469,7 @@ def PutDatabase (subscription_id, database_id, event):
     return response_json
     Logs(response_json)
     
-def DeleteDatabase (subscription_id, db_id):
+def DeleteDatabase (subscription_id, database_id):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
     
     response_peer = requests.delete(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
