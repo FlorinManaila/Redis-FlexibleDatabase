@@ -257,22 +257,22 @@ def lambda_handler (event, context):
             GetResponse(responseURL, responseBody)
         databases = GetAllDatabases(cf_sub_id)
         if str(cf_db_id) in str(databases):
-            try:
-                responseValue = DeleteDatabase(cf_sub_id, cf_db_id)
-                responseData.update({"SubscriptionId":str(subscription_id), "DatabaseId":str(db_id), "DatabaseDescription":str(db_description), "PostCall":str(callEvent)})
-                print (responseData)
-                responseBody.update({"Data":responseData})
-                GetResponse(responseURL, responseBody)
-            except:
-                responseStatus = 'FAILED'
-                reason = "Unable to delete database"
-                if responseStatus == 'FAILED':
-                    responseBody.update({"Status":responseStatus})
-                    if "Reason" in str(responseBody):
-                        responseBody.update({"Reason":reason})
-                    else:
-                        responseBody["Reason"] = reason
-                    GetResponse(responseURL, responseBody)
+            #try:
+            responseValue = DeleteDatabase(cf_sub_id, cf_db_id)
+            responseData.update({"SubscriptionId":str(subscription_id), "DatabaseId":str(db_id), "DatabaseDescription":str(db_description), "PostCall":str(callEvent)})
+            print (responseData)
+            responseBody.update({"Data":responseData})
+            GetResponse(responseURL, responseBody)
+            # except:
+            #     responseStatus = 'FAILED'
+            #     reason = "Unable to delete database"
+            #     if responseStatus == 'FAILED':
+            #         responseBody.update({"Status":responseStatus})
+            #         if "Reason" in str(responseBody):
+            #             responseBody.update({"Reason":reason})
+            #         else:
+            #             responseBody["Reason"] = reason
+            #         GetResponse(responseURL, responseBody)
         else:
             print("Database does not exists")
             GetResponse(responseURL, responseBody)
