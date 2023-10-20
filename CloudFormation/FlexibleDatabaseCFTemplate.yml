@@ -77,7 +77,7 @@ Parameters:
       Description: "[Optional]. Database protocol: either 'redis' or 'memcached'. Default: 'redis'"
       Default: redis
     port:
-      Type: Number
+      Type: String
       Description: "[Optional]. TCP port on which the database is available (10000-19999). Generated automatically if omitted. Example: 10000"
     memoryLimitInGb:
       Type: Number
@@ -134,7 +134,7 @@ Parameters:
       Type: String
       Description: "[Optional]. This database will be a replica of the specified Redis databases provided as one or more URI (sample format: 'redis://user:password@host:port)'. If the URI provided is Redis Cloud instance, only host and port should be provided (using the format: ['redis://endpoint1:6379', 'redis://endpoint2:6380'])."
     averageItemSizeInBytes:
-      Type: Number
+      Type: String
       Description: "[Optional]. Relevant only to ram-and-flash subscriptions. Estimated average size (measured in bytes) of the items stored in the database, Default: 1000"
     #throughputMeasurement
     by:
@@ -186,7 +186,7 @@ Parameters:
       Type: String
       Description: "[Required to enable alerts]. Alert name. Name list: [ dataset-size, datasets-size, throughput-higher-than, throughput-lower-than, latency, syncsource-error, syncsource-lag, connections-limit ]"
     alertValue:
-      Type: Number
+      Type: String
       Description: "[Required to enable alerts]. Alert value. Example: 80"
     #modules
     moduleName:
