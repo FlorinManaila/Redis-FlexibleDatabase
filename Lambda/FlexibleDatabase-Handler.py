@@ -390,34 +390,35 @@ def PutDatabase (subscription_id, database_id, event):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
     print (event)
     
-    throughputMeasurement = {}
-    for key in list(event[throughputMeasurement]):
-    	if key == "by":
-    	    throughputMeasurement['by'] = event[key]
-    	if key == "value":
-    	    throughputMeasurement['value'] = event[key]
+    # throughputMeasurement = {}
+    # throughputMeasurement = event.get("throughputMeasurement")
+    # for key in list(throughputMeasurement):
+    # 	if key == "by":
+    # 	    throughputMeasurement['by'] = event[key]
+    # 	if key == "value":
+    # 	    throughputMeasurement['value'] = event[key]
     
-    remoteBackup = {}
-    for key in list(event[remoteBackup]):
-    	if key == "active":
-    	    remoteBackup['active'] = event[key]
-    	if key == "interval":
-    	    remoteBackup['interval'] = event[key]
-    	if key == "timeUTC":
-    	    remoteBackup['timeUTC'] = event[key]
-    	if key == "storageType":
-    	    remoteBackup['storageType'] = event[key]
-    	if key == "storagePath":
-    	    remoteBackup['storagePath'] = event[key]
+    # remoteBackup = {}
+    # for key in list(event[remoteBackup]):
+    # 	if key == "active":
+    # 	    remoteBackup['active'] = event[key]
+    # 	if key == "interval":
+    # 	    remoteBackup['interval'] = event[key]
+    # 	if key == "timeUTC":
+    # 	    remoteBackup['timeUTC'] = event[key]
+    # 	if key == "storageType":
+    # 	    remoteBackup['storageType'] = event[key]
+    # 	if key == "storagePath":
+    # 	    remoteBackup['storagePath'] = event[key]
     
-    alertsList = []
-    alertsDict = {}
-    for key in list(event[alerts]):
-    	if key == "alertName":
-    	    alertsDict['name'] = event[key]
-    	if key == "alertValue":
-    	    alertsDict['value'] = event[key]
-    alertsList.append(alertsDict)
+    # alertsList = []
+    # alertsDict = {}
+    # for key in list(event[alerts]):
+    # 	if key == "alertName":
+    # 	    alertsDict['name'] = event[key]
+    # 	if key == "alertValue":
+    # 	    alertsDict['value'] = event[key]
+    # alertsList.append(alertsDict)
     
     update_dict = {}
     for key in list(event):
@@ -430,7 +431,7 @@ def PutDatabase (subscription_id, database_id, event):
     	if key == "respVersion":
     	    update_dict['respVersion'] = event[key]
     	if key == "throughputMeasurement":
-    	    update_dict['throughputMeasurement'] = throughputMeasurement
+    	    update_dict['throughputMeasurement'] = event[key]
     	if key == "dataPersistence":
     	    update_dict['dataPersistence'] = event[key]
     	if key == "dataEvictionPolicy":
@@ -460,9 +461,9 @@ def PutDatabase (subscription_id, database_id, event):
     	if key == "enableDefaultUser":
     	    update_dict['enableDefaultUser'] = event[key]
     	if key == "remoteBackup":
-    	    update_dict['remoteBackup'] = remoteBackup
+    	    update_dict['remoteBackup'] = event[key]
     	if key == "alerts":
-    	    update_dict['alerts'] = alertsList
+    	    update_dict['alerts'] = event[key]
     print ("Dict to PUT is:")
     print (update_dict)
     
