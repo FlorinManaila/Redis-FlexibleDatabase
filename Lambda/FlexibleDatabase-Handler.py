@@ -193,12 +193,16 @@ def lambda_handler (event, context):
         PhysicalResourceId = event['PhysicalResourceId']
         responseBody.update({"PhysicalResourceId":PhysicalResourceId})
         
-        if event['ResourceProperties']["enableDefaultUser"] == "true":
-            event['ResourceProperties']["enableDefaultUser"] = True
-        elif event['ResourceProperties']["enableDefaultUser"] == "false":
-            event['ResourceProperties']["enableDefaultUser"] = False
+        
+        if "enableDefaultUser" in event['ResourceProperties']:
+            if event['ResourceProperties']["enableDefaultUser"] == "true":
+                event['ResourceProperties']["enableDefaultUser"] = True
+            elif event['ResourceProperties']["enableDefaultUser"] == "false":
+                event['ResourceProperties']["enableDefaultUser"] = False
+            
         if "regexRules" in event['ResourceProperties']:
             callEvent["regexRules"] = event['ResourceProperties']["regexRules"]
+        
         if "enableDefaultUser" in event['ResourceProperties']:
             callEvent["enableDefaultUser"] = event['ResourceProperties']["enableDefaultUser"]
         db_status = GetDatabaseStatus(cf_db_id)
