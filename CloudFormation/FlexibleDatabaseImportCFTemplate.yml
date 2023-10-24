@@ -76,6 +76,18 @@ Parameters:
       Type: String
       Description: "[Required]. One or more URIs to source data files or Redis databases, as appropriate to specified source type (example: ['http://mydomain.com/redis-backup-file1', 'http://mydomain.com/redis-backup-file2'])."
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Parameters:
+          - version
+          - baseURL
+          - subscriptionId
+          - databaseId
+          - sourceType
+          - importFromUri
+
 Resources:
   # StepFunctionsAllowLambda:
   #   Type: AWS::IAM::Role
