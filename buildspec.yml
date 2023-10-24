@@ -31,7 +31,7 @@ phases:
       - zip -j FlexibleDatabaseBackup-Handler.zip Lambda/FlexibleDatabaseBackup-Handler.py
       - zip -j FlexibleDatabaseImport-Handler.zip Lambda/FlexibleDatabaseImport-Handler.py
       - zip -j FlexibleDatabase-CFResponse.zip Lambda/FlexibleDatabase-CFResponse.py
-      - zip -j FlexibleDatabase-Handler.zip Lambda/FlexibleDatabase-Handler.py
+      - zip -j FlexibleDatabase-CheckState.zip Lambda/FlexibleDatabase-CFResponse.py
       - aws s3 cp FlexibleDatabase-CheckState.zip s3://redis-cicd/Flexible-Database/latest/
       - aws s3 cp FlexibleDatabase-CFResponse.zip s3://redis-cicd/Flexible-Database/latest/
       - aws s3 cp FlexibleDatabase-Handler.zip s3://redis-cicd/Flexible-Database/latest/
