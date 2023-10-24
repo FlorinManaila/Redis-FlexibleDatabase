@@ -53,7 +53,7 @@ def lambda_handler (event, context):
                     }
                     
     if event['RequestType'] == "Create":
-        responseValue = PostDatabase(callEvent, subscription_id, database_id)
+        responseValue = PostBackup(callEvent, subscription_id, database_id)
         print ("This is the responseValue")
         print (responseValue)
         
