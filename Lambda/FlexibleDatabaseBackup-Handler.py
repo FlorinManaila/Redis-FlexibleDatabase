@@ -105,6 +105,16 @@ def lambda_handler (event, context):
         responseBody.update({"Data":responseData})
         GetResponse(responseURL, responseBody)
     
+def RetrieveSecret(secret_name):
+    headers = {"X-Aws-Parameters-Secrets-Token": os.environ.get('AWS_SESSION_TOKEN')}
+
+    secrets_extension_endpoint = "http://localhost:2773/secretsmanager/get?secretId=" + str(secret_name)
+    r = requests.get(secrets_extension_endpoint, headers=headers)
+    secret = json.loads(r.text)["SecretString"]
+    secret = json.loads(secret)
+
+    return secret    
+    
 def CurrentOutputs():
     cloudformation = boto3.client('cloudformation')
     cf_response = cloudformation.describe_stacks(StackName=stack_name)
