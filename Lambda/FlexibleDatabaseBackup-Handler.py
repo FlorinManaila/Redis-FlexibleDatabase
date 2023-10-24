@@ -15,6 +15,7 @@ def lambda_handler (event, context):
 
     print (event)
     # aws_account_id = context.invoked_function_arn.split(":")[4]
+    responseData = {}
     responseStatus = 'SUCCESS'
     responseURL = event['ResponseURL']
     responseBody = {'Status': responseStatus,
