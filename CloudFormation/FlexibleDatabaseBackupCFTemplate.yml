@@ -67,7 +67,7 @@ Parameters:
       Description: "[Optional]. Name of cloud provider region where the local database is located. When backing up an active-active database, backup is done separately for each local database at a specified region."
 
 Conditions:
-  regionNameCondition:                              !Not [!Equals [!Ref regionName, ""]]
+  regionNameCondition: !Not [!Equals [!Ref regionName, ""]]
 
 Resources:
   # StepFunctionsAllowLambda:
