@@ -31,7 +31,7 @@ def lambda_handler (event, context):
     subscription_id = event['ResourceProperties']["subscriptionId"]
     print ("Subscription ID is: " + str(subscription_id))
     database_id = event['ResourceProperties']["databaseId"]
-    print ("Database ID is: " + str(databaseId))
+    print ("Database ID is: " + str(database_id))
     
     global stack_name
     global base_url
