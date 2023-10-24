@@ -66,6 +66,17 @@ Parameters:
       Type: String
       Description: "[Optional]. Name of cloud provider region where the local database is located. When backing up an active-active database, backup is done separately for each local database at a specified region."
 
+Metadata:
+  AWS::CloudFormation::Interface:
+    ParameterGroups:
+      - 
+        Parameters:
+          - version
+          - baseURL
+          - subscriptionId
+          - dbname
+          - regionName
+
 Conditions:
   regionNameCondition: !Not [!Equals [!Ref regionName, ""]]
 
