@@ -26,7 +26,7 @@ def lambda_handler (event, context):
         callEvent["sourceType"] = event['ResourceProperties']["sourceType"]
     importFromUriList = []
     if "importFromUri" in event['ResourceProperties']:
-        importFromUriList.append(event['ResourceProperties'])
+        importFromUriList.append(event['ResourceProperties']["importFromUri"])
         callEvent["importFromUri"] = importFromUriList
     
     print ("callEvent that is used as the actual API Call is bellow:")
@@ -45,8 +45,6 @@ def lambda_handler (event, context):
     x_api_key =  RetrieveSecret("redis/x_api_key")["x_api_key"]
     x_api_secret_key =  RetrieveSecret("redis/x_api_secret_key")["x_api_secret_key"]
     stack_name = str(event['StackId'].split("/")[1])
-    
-    
     
     responseData = {}
     responseStatus = 'SUCCESS'
