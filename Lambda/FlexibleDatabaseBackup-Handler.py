@@ -27,3 +27,8 @@ def lambda_handler (event, context):
     responseData.update({"SubscriptionId":str("1"), "DatabaseId":str("2"), "PostCall":str("3")})
     responseBody.update({"Data":responseData})
     GetResponse(responseURL, responseBody)
+    
+def GetResponse(responseURL, responseBody): 
+    responseBody = json.dumps(responseBody)
+    req = requests.put(responseURL, data = responseBody)
+    print ('RESPONSE BODY:n' + responseBody)
