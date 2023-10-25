@@ -14,7 +14,7 @@ phases:
       # Clone the GitHub repository
       - git clone https://github.com/FlorinManaila/Redis-FlexibleDatabase.git
       - cd Redis-FlexibleDatabase
-      
+
       # Extract the version number from the commit message
       - |
         commit_msg=$(git log -1 --pretty=format:%s)
@@ -36,7 +36,7 @@ phases:
       - zip -j FlexibleDatabaseBackup-Handler.zip Lambda/FlexibleDatabaseBackup-Handler.py
       - zip -j FlexibleDatabaseImport-Handler.zip Lambda/FlexibleDatabaseImport-Handler.py
 
-      - zip -j FlexibleDatabase-CheckState.zip Lambda/FlexibleDatabase-CFResponse.py
+      - zip -j FlexibleDatabase-CheckState.zip Lambda/FlexibleDatabase-CheckState.py
       - zip -j FlexibleDatabaseBackup-CheckState.zip Lambda/FlexibleDatabaseBackup-CFResponse.py
       - zip -j FlexibleDatabaseImport-CheckState.zip Lambda/FlexibleDatabaseImport-CFResponse.py
 
