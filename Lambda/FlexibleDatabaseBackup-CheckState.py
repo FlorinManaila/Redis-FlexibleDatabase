@@ -9,6 +9,7 @@ from os import environ
 accept = "application/json"
 
 def lambda_handler(event, context):
+    #Prints the event retrieved from the Handler function through Step Functions
     print (json.dumps(event))
     global base_url
     global x_api_key
@@ -18,8 +19,10 @@ def lambda_handler(event, context):
     x_api_secret_key =  RetrieveSecret("redis/x_api_secret_key")["x_api_secret_key"]
     subscription_id = event["responseBody"]["Data"]["SubscriptionId"]
     database_id = event["responseBody"]["Data"]["DatabaseId"]
+    #Calls the GetStatus function in a loop created by the state machine until the status is 'active'
     db_status = GetDatabaseStatus(subscription_id, database_id)
     
+    #return the event which is a status to Step Functions to use it further to call the CFResponse lambda
     print (db_status)
     event["db_status"] = db_status
     return event
