@@ -6,17 +6,25 @@ import requests
 import os
 from os import environ
 
-
+#Global variables used in composing the URL as in CAPI
 accept = "application/json"
 content_type = "application/json"
+
+#runtime_region will take the value of the current lambda region
 runtime_region = os.environ['AWS_REGION']
+
+#initialization of a stepfunctions client to interact with Step Functions service
 stepfunctions = boto3.client("stepfunctions")
 
 def lambda_handler (event, context):
-
+    
+    #The event that is sent from CloudFormation. Displayed in CloudWatch logs.
     print (event)
+    
+    #aws_account_id will take the value of the user's account id
     aws_account_id = context.invoked_function_arn.split(":")[4]
     
+    #Due to CloudFormation, the cast from String to Boolean needs to be done from Lambda
     if event['ResourceProperties']["dryRun"] == "true":
         event['ResourceProperties']["dryRun"] = True
     elif event['ResourceProperties']["dryRun"] == "false":
@@ -48,7 +56,8 @@ def lambda_handler (event, context):
             event['ResourceProperties']["enableTls"] = True
         elif event['ResourceProperties']["enableTls"] == "false":
             event['ResourceProperties']["enableTls"] = False
-        
+    
+    #Creating the callEvent dictionary that will be identical with a Swagger API call    
     throughputMeasurement = {}
     if "by" in event['ResourceProperties']:
         throughputMeasurement["by"] = event['ResourceProperties']["by"]
@@ -137,6 +146,7 @@ def lambda_handler (event, context):
     subscription_id = event['ResourceProperties']["subscriptionId"]
     print ("Subscription ID is: " + str(subscription_id))
     
+    #Additional global variables used in methods for URL composing or as credentials to login.
     global stack_name
     global base_url
     global x_api_key
@@ -147,6 +157,7 @@ def lambda_handler (event, context):
     stack_name = str(event['StackId'].split("/")[1])
     responseData = {}
     
+    #Creating the CloudFormation response block. Presuming the status as SUCCESS. If an error occurs, the status is changed to FAILED.
     responseStatus = 'SUCCESS'
     responseURL = event['ResponseURL']
     responseBody = {'Status': responseStatus,
@@ -155,16 +166,20 @@ def lambda_handler (event, context):
                     'RequestId': event['RequestId'],
                     'LogicalResourceId': event['LogicalResourceId']
                     }
-                    
+    
+    #If the action of CloudFormation is Create stack                
     if event['RequestType'] == "Create":
+        #The API Call the creates the Database
         responseValue = PostDatabase(callEvent, subscription_id)
         print (responseValue)
 
         try:
+            #Retrieving Database ID and Database Description to populate Outputs tab of the stack
             db_id, db_description = GetDatabaseId (responseValue['links'][0]['href'])
             print ("Description for Database with id " + str(db_id) + " is: " + str(db_description))
             responseData.update({"SubscriptionId":str(subscription_id), "DatabaseId":str(db_id), "DatabaseDescription":str(db_description), "PostCall":str(callEvent)})
             responseBody.update({"Data":responseData})
+            #Initializing input for Step Functions then triggering the state machine
             SFinput = {}
             SFinput["responseBody"] = responseBody
             SFinput["responseURL"] = responseURL
@@ -178,6 +193,7 @@ def lambda_handler (event, context):
             print (json.dumps(SFinput))
         
         except:
+            #If any error is encounter in the "try" block, then a function will catch the error and throw it back to CloudFormation as a failure reason.
             db_error = GetDatabaseError (responseValue['links'][0]['href'])
             responseStatus = 'FAILED'
             reason = str(db_error)
@@ -189,12 +205,14 @@ def lambda_handler (event, context):
                     responseBody["Reason"] = reason
                 GetResponse(responseURL, responseBody)
     
+    #If the action of CloudFormation is Update stack
     if event['RequestType'] == "Update":
+        #Retrieve parameters from Outputs tab of the stack and appending the dictionary with the PhysicalResourceId which is a required parameter for Update actions
         cf_sub_id, cf_event, cf_db_id, cf_db_description = CurrentOutputs()
         PhysicalResourceId = event['PhysicalResourceId']
         responseBody.update({"PhysicalResourceId":PhysicalResourceId})
         
-        
+        #Introducing 2 new parameters that can change their values only upon Update stack.
         if "enableDefaultUser" in event['ResourceProperties']:
             if event['ResourceProperties']["enableDefaultUser"] == "true":
                 event['ResourceProperties']["enableDefaultUser"] = True
@@ -207,9 +225,11 @@ def lambda_handler (event, context):
         if "enableDefaultUser" in event['ResourceProperties']:
             callEvent["enableDefaultUser"] = event['ResourceProperties']["enableDefaultUser"]
         db_status = GetDatabaseStatus(cf_sub_id, cf_db_id)
-
+        
+        #Checking if the subscription is created/creating/deleting and taking actions based on that
         if str(db_status) == "active":
             responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
+            #json.loads function limitation to properly convert boolean and '\' character
             cf_event = cf_event.replace("\'", "\"")
             cf_event = cf_event.replace("False", "false")
             cf_event = cf_event.replace("True", "true")
@@ -225,6 +245,7 @@ def lambda_handler (event, context):
             
             GetResponse(responseURL, responseBody)
         
+        #If the subscription is still in pending, the update stack action will fail 
         elif str(db_status) == "pending":
             responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
             print ("this is response value for update in pending")
@@ -239,7 +260,8 @@ def lambda_handler (event, context):
                 else:
                     responseBody["Reason"] = reason
                 GetResponse(responseURL, responseBody)
-                
+         
+        #If the subscription is deleting, the update stack action will fail, obviously         
         elif str(db_status) == "deleting":
             responseValue = PutDatabase(cf_sub_id, cf_db_id, callEvent)
             db_error = GetDatabaseError (responseValue['links'][0]['href'])
@@ -252,8 +274,10 @@ def lambda_handler (event, context):
                 else:
                     responseBody["Reason"] = reason
                 GetResponse(responseURL, responseBody)
-            
+    
+    #If the action of CloudFormation is Delete stack        
     if event['RequestType'] == "Delete":
+        #If the parameters cannot be retrieved, this means the stack was already deleted
         try:
             cf_sub_id, cf_event, cf_db_id, cf_db_description = CurrentOutputs()
         except:
@@ -261,6 +285,8 @@ def lambda_handler (event, context):
             responseBody.update({"Status":responseStatus})
             GetResponse(responseURL, responseBody)
         databases = GetAllDatabases(cf_sub_id)
+        
+        #Search for the current database among the others. If found -> Success and delete, otherwise Fail.
         if str(cf_db_id) in str(databases):
             try:
                 responseValue = DeleteDatabase(cf_sub_id, cf_db_id)
@@ -281,7 +307,8 @@ def lambda_handler (event, context):
         else:
             print("Database does not exists")
             GetResponse(responseURL, responseBody)
-
+            
+#This function retrieves x_api_key and x_api_secret_key from Secrets Manager service and returns them in the function as variables
 def RetrieveSecret(secret_name):
     headers = {"X-Aws-Parameters-Secrets-Token": os.environ.get('AWS_SESSION_TOKEN')}
 
@@ -292,6 +319,7 @@ def RetrieveSecret(secret_name):
 
     return secret
 
+#This function retrieves the parameters from Outputs tab of the stack to be used later
 def CurrentOutputs():
     cloudformation = boto3.client('cloudformation')
     cf_response = cloudformation.describe_stacks(StackName=stack_name)
@@ -313,7 +341,8 @@ def CurrentOutputs():
     print ("cf_db_id is: " + str(cf_db_id))
     print ("cf_db_description is: " + str(cf_db_description))
     return cf_sub_id, cf_event, cf_db_id, cf_db_description
-    
+
+#Makes the POST API call for Database    
 def PostDatabase (event, subscription_id):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases"
     
@@ -321,24 +350,8 @@ def PostDatabase (event, subscription_id):
     response_json = response.json()
     return response_json
     Logs(response_json)
-    
-def GetDatabase (subscription_id, database_id):
-    url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
-    count = 0
-    response = requests.get(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
-    response = response.json()
-    
-    while "databaseId" not in str(response) and count < 120:
-        time.sleep(1)
-        count += 1
-        print (str(response))
-        response = requests.get(response['links'][0]['href'], headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
-        response = response.json()
-        
-    print (response)
-    return response
-    Logs(response)
-    
+
+#Returns the status of the Database: active/pending/deleting
 def GetDatabaseStatus (subscription_id, database_id):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
     
@@ -347,7 +360,8 @@ def GetDatabaseStatus (subscription_id, database_id):
     db_status = response["status"]
     print ("Database status is: " + db_status)
     return db_status
-    
+
+#Returns the ID and the Description of the Database    
 def GetDatabaseId (url):
     response = requests.get(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
     response = response.json()
@@ -364,7 +378,8 @@ def GetDatabaseId (url):
     db_id = response["response"]["resourceId"]
     db_description = response["description"]
     return db_id, db_description
-    
+
+#Returns all the databases assigned to a subscription    
 def GetAllDatabases (subscription_id, offset = 0, limit = 100):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases?offset=" + str(offset) + "&limit=" + str(limit)
     
@@ -372,7 +387,8 @@ def GetAllDatabases (subscription_id, offset = 0, limit = 100):
     response_json = response.json()
     return response_json
     Logs(response_json)
-    
+
+#When encountering an error, returns that error    
 def GetDatabaseError (url):
     response = requests.get(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
     response = response.json()
@@ -386,40 +402,10 @@ def GetDatabaseError (url):
 
     db_error_description = response["response"]["error"]["description"]
     return db_error_description
-    
+
+#Makes the PUT API call upon Update stack after building a dictionary with accepted parameters
 def PutDatabase (subscription_id, database_id, event):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
-    print (event)
-    
-    # throughputMeasurement = {}
-    # throughputMeasurement = event.get("throughputMeasurement")
-    # for key in list(throughputMeasurement):
-    # 	if key == "by":
-    # 	    throughputMeasurement['by'] = event[key]
-    # 	if key == "value":
-    # 	    throughputMeasurement['value'] = event[key]
-    
-    # remoteBackup = {}
-    # for key in list(event[remoteBackup]):
-    # 	if key == "active":
-    # 	    remoteBackup['active'] = event[key]
-    # 	if key == "interval":
-    # 	    remoteBackup['interval'] = event[key]
-    # 	if key == "timeUTC":
-    # 	    remoteBackup['timeUTC'] = event[key]
-    # 	if key == "storageType":
-    # 	    remoteBackup['storageType'] = event[key]
-    # 	if key == "storagePath":
-    # 	    remoteBackup['storagePath'] = event[key]
-    
-    # alertsList = []
-    # alertsDict = {}
-    # for key in list(event[alerts]):
-    # 	if key == "alertName":
-    # 	    alertsDict['name'] = event[key]
-    # 	if key == "alertValue":
-    # 	    alertsDict['value'] = event[key]
-    # alertsList.append(alertsDict)
     
     update_dict = {}
     for key in list(event):
@@ -474,18 +460,21 @@ def PutDatabase (subscription_id, database_id, event):
     print(response_json)
     return response_json
     Logs(response_json)
-    
+
+#Makes the Delete API call    
 def DeleteDatabase (subscription_id, database_id):
     url = base_url + "/v1/subscriptions/" + str(subscription_id) + "/databases/" + str(database_id)
     
     response_peer = requests.delete(url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
     Logs(response_peer.json())
 
+#Send response back to CloudFormation   
 def GetResponse(responseURL, responseBody): 
     responseBody = json.dumps(responseBody)
     req = requests.put(responseURL, data = responseBody)
     print ('RESPONSE BODY:n' + responseBody)
-    
+
+#Checks if there is an error in the description    
 def Logs(response_json):
     error_url = response_json['links'][0]['href']
     error_message = requests.get(error_url, headers={"accept":accept, "x-api-key":x_api_key, "x-api-secret-key":x_api_secret_key})
