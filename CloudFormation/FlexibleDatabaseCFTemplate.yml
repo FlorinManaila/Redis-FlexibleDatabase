@@ -1,5 +1,7 @@
 AWSTemplateFormatVersion: 2010-09-09
 Description: Cloud formation template for Flexible Databases
+#Mappings section is designed for AWS managed layer: AWS-Parameters-and-Secrets-Lambda-Extension-Arm64. Because the layer ARN depends on the region
+#of creation, mappings will make a one-to-one relation between ARN and region.
 Mappings:
   ParametersAndSecretsLayer:
     us-east-1:
@@ -47,6 +49,8 @@ Mappings:
     sa-east-1:
         ParametersAndSecrets: arn:aws:lambda:sa-east-1:933737806257:layer:AWS-Parameters-and-Secrets-Lambda-Extension-Arm64:8
 
+#All the parameters that can be used accord to Swagger with 2 additional ones: version and baseURL, used to determine the CloudFormation template
+#version that is desired to be used and the base URL for the RedisCloud server.  
 Parameters:
     version:
       Type: String
@@ -162,7 +166,6 @@ Parameters:
     storagePath:
       Type: String
       Description: "[Required when active is true]. Path for backup. s3://<bucket-name>/<path>/"
-    #remoteBackupdone
     sourceIp:
       Type: String
       Description: "[Optional]. List of source IP addresses or subnet masks. If specified, Redis clients will be able to connect to this database only from within the specified source IP addresses ranges. example value: '['192.168.10.0/32', '192.168.12.0/24']'"
@@ -202,6 +205,7 @@ Parameters:
       Type: String
       Description: "[Cannot assign value upon creating stack. Value can be assigned only on stack update][Optional]. When 'true', enables connecting to the database with the 'default' user. Default: 'true'. Can only be set if Database Protocol is REDIS"
 
+#Metadata block is used to separate parameters displayed upon stack creation in a more organised order.
 Metadata:
   AWS::CloudFormation::Interface:
     ParameterGroups:
@@ -263,6 +267,7 @@ Metadata:
          - regexRules
          - enableDefaultUser
 
+#Conditions are used to check if an optional parameter have a value or the field is empty
 Conditions:
   dryRunCondition:                              !Not [!Equals [!Ref dryRun, ""]]
   protocolCondition:                            !Not [!Equals [!Ref protocol, ""]]
@@ -295,7 +300,9 @@ Conditions:
   regexRulesCondition:                          !Not [!Equals [!Ref regexRules, ""]]
   enableDefaultUserCondition:                   !Not [!Equals [!Ref enableDefaultUser, ""]]
 
+#Resources block creates and integrates the required AWS services within the architecture
 Resources:
+  #Step Functions IAM role that allows Lambda invokation
   StepFunctionsAllowLambda:
     Type: AWS::IAM::Role
     Properties:
@@ -321,6 +328,7 @@ Resources:
             - lambda:InvokeFunction
             Resource: "*"
 
+  #Configuration of Step Functions' State Machine with all the required steps and lambda invokations
   MyStateMachine:
     Type: AWS::StepFunctions::StateMachine
     DependsOn: 
@@ -402,6 +410,7 @@ Resources:
           }
         }
 
+  #Creation of lambda's requests_layer using the archive from S3.
   RequestsLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -425,6 +434,7 @@ Resources:
         - arm64
         - x86_64
 
+  #Creation of lambda's secrets_layer using the archive from S3.
   SecretsLayer:
     Type: AWS::Lambda::LayerVersion
     Properties:
@@ -447,7 +457,8 @@ Resources:
       CompatibleArchitectures: 
         - arm64
         - x86_64
-      
+
+  #Lambda's Execution Role created in IAM allowing CloudWatch, Step Functions, CloudFormation, Secrets Manager and S3 actions      
   RedisLambdaExecutionRole:
     Type: AWS::IAM::Role
     Properties:
@@ -484,6 +495,7 @@ Resources:
             - s3:DeleteObject
             Resource: "*"
 
+  #EventInvokeConfig blocks are used to set the maximum retry attempts of lambda's invokation to 0. This means that each lambda will run only 1 time.
   FlexibleDatabaseHandlerEventInvokeConfig:
     Type: AWS::Lambda::EventInvokeConfig
     Properties: 
@@ -503,6 +515,7 @@ Resources:
       MaximumRetryAttempts: 0
       Qualifier: $LATEST
 
+  #Main Lambda function's settings and configurations
   FlexibleDatabaseHandler:
     Type: AWS::Lambda::Function
     Properties:
@@ -527,6 +540,7 @@ Resources:
               - !Ref version
               - "/FlexibleDatabase-Handler.zip"
 
+  #CheckState Lambda function's config and settings used to check if the resource created is active or not.
   FlexibleDatabaseCheckState:
     Type: AWS::Lambda::Function
     Properties:
@@ -550,7 +564,8 @@ Resources:
             - - "Flexible-Database/"
               - !Ref version
               - "/FlexibleDatabase-CheckState.zip"
-    
+
+  #CFResponse Lambda function's config and settings used to send the response back to CloudFormation stack.   
   FlexibleDatabaseCFResponse:
     Type: AWS::Lambda::Function
     Properties:
@@ -575,6 +590,7 @@ Resources:
               - !Ref version
               - "/FlexibleDatabase-CFResponse.zip"
 
+  #CloudFormation's custom resource that allows users to interact and insert values for Redis parameters in order to create relevant API Calls.
   Redis:
     Type: Custom::FlexibleDatabase-Handler
     Version: "1.0"
@@ -616,6 +632,8 @@ Resources:
       regexRules:                          !If [regexRulesCondition, !Ref regexRules, !Ref "AWS::NoValue"]
       enableDefaultUser:                   !If [enableDefaultUserCondition, !Ref enableDefaultUser, !Ref "AWS::NoValue"]
 
+#Outputs section that is displayed in the Outputs' tab of the stack containing relevant information about Redis resources.
+#Those parameters are updated also upon stack Updates.   
 Outputs:
   SubscriptionId:
     Description: Subscription ID used for the current stack
